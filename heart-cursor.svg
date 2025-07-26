@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32">
+  <defs>
+    <!-- 3D-style radial gradient -->
+    <radialGradient id="heartGradient" cx="50%" cy="40%" r="70%">
+      <stop offset="0%" stop-color="#ffb6c1"/>
+      <stop offset="40%" stop-color="#ff4f75"/>
+      <stop offset="100%" stop-color="#a00030"/>
+    </radialGradient>
+
+    <!-- Soft shadow -->
+    <filter id="heartShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="1.5" dy="1.5" stdDeviation="1.2" flood-color="#000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <!-- Polished heart shape -->
+  <path
+    d="M16 29s-13-8.5-13-17.2C3 6.5 8.2 2.5 12.5 6
+       c1.2 1 2.3 2.6 3.5 4.2 1.2-1.6 2.3-3.2 3.5-4.2
+       4.3-3.5 9.5 0.5 9.5 5.8C29 20.5 16 29 16 29z"
+    fill="url(#heartGradient)"
+    filter="url(#heartShadow)"
+  />
+</svg>
