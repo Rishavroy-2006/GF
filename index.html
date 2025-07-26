@@ -342,8 +342,6 @@
           max-width: 90%;
         }
 
-       
-
         .flower {
           width: 30px;
           height: 30px;
@@ -374,6 +372,63 @@
           bottom: 12px;
           left: 82%;
         }
+
+        #musicButton {
+          bottom: 6.5rem;
+          right: 2rem;
+          padding: 0.8rem 1.4rem;
+          font-size: 1.1rem;
+          min-width: 130px;
+          border-radius: 1rem;
+        }
+      }
+
+      #musicButton {
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.8s ease, transform 0.2s ease;
+        position: fixed;
+        bottom: 6.5rem; /* a bit closer to bottom on mobile */
+        right: 1.5rem; /* less margin on the side */
+        z-index: 50;
+        background-color: #ff437c; /* nice solid pink */
+        color: white;
+        border: none;
+        border-radius: 2.6rem; /* subtle rounding for better feel */
+        padding: 0.6rem 1.2rem;
+        font-size: 1rem;
+        font-weight: bold;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(255, 111, 145, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        white-space: nowrap;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        min-width: 110px; /* enough for tap */
+        touch-action: manipulation; /* improves tap responsiveness */
+      }
+      #musicButton:hover {
+        background-color: #ff4d6d;
+        box-shadow: 0 8px 20px rgba(255, 77, 109, 0.7);
+        transform: scale(1.05);
+      }
+
+      /* Class to fade it in */
+      #musicButton.fade-in {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      /* Class to fade it out */
+      #musicButton.fade-out {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      /* Keep it hidden initially */
+      #musicButton.hidden {
+        display: none;
       }
     </style>
   </head>
@@ -403,6 +458,12 @@
         💌 Tap for a tiny love note
       </button>
     </div>
+
+    <div id="musicButtonWrapper">
+      <button id="musicButton">💗 Tap to Play Music</button>
+    </div>
+
+    <!-- Cute floating music button -->
 
     <div class="flower-area">
       <div class="flower flower1">
@@ -447,6 +508,10 @@
       </div>
     </div>
 
+    <audio id="bgMusic" loop>
+      <source src="music.mp3" type="audio/mpeg" />
+    </audio>
+
     <script>
       //typewrite
       const text = "Hey Aishwarya, today’s officially about you 💖";
@@ -463,6 +528,10 @@
           setTimeout(() => {
             animateFlowers();
           }, 1000); // Wait ~1s for fades to finish
+
+          setTimeout(() => {
+            showMusicButton();
+          }, 1000 + 5 * 300 + 500); // 5 flowers * 300ms delay + buffer
         }
       }
 
@@ -473,6 +542,43 @@
             flower.classList.add("flower-float");
           }, i * 300); // Delay each flower by 0.3s
         });
+      }
+
+      function showMusicButton() {
+        const btn = document.getElementById("musicButton");
+
+        // Step 1: Unhide (display:block)
+        btn.classList.remove("hidden");
+
+        // Step 2: Fade in (triggers transition)
+        requestAnimationFrame(() => {
+          btn.classList.add("fade-in");
+        });
+
+        // Step 3: Click to play & fade out
+        btn.addEventListener(
+          "click",
+          () => {
+            const audio = document.getElementById("bgMusic");
+            audio
+              .play()
+              .then(() => {
+                // Fade out
+                btn.classList.remove("fade-in");
+                btn.classList.add("fade-out");
+
+                // Step 4: After fade completes, remove from layout
+                setTimeout(() => {
+                  btn.classList.add("hidden");
+                  btn.classList.remove("fade-out");
+                }, 800); // match transition duration
+              })
+              .catch((err) => {
+                console.log("Music play error:", err);
+              });
+          },
+          { once: true }
+        );
       }
 
       function startFadeAnimations() {
@@ -488,16 +594,38 @@
 
       typeWriter(); // Start typing on load
 
+      window.addEventListener(
+        "click",
+        () => {
+          const audio = document.getElementById("bgMusic");
+          if (audio && audio.paused) {
+            audio.play().catch((e) => {
+              console.log("Autoplay blocked:", e);
+            });
+          }
+        },
+        { once: true }
+      );
+
       // Floating hearts
-      setInterval(() => {
-        const h = document.createElement("span");
-        h.innerHTML = "♥";
-        h.className = "heart";
-        h.style.left = Math.random() * 100 + "vw";
-        h.style.animationDuration = 3 + Math.random() * 4 + "s";
-        document.body.appendChild(h);
-        setTimeout(() => h.remove(), 7000);
-      }, 800);
+      window.addEventListener("DOMContentLoaded", () => {
+        const audio = document.getElementById("bgMusic");
+        if (audio) {
+          audio.play().catch((err) => {
+            // Fallback for autoplay block
+            console.log("Autoplay blocked. Will play on interaction.");
+
+            const startMusic = () => {
+              audio.play().catch(() => {});
+              window.removeEventListener("click", startMusic);
+              window.removeEventListener("scroll", startMusic);
+            };
+
+            window.addEventListener("click", startMusic);
+            window.addEventListener("scroll", startMusic);
+          });
+        }
+      });
 
       // Load image strip
       const gallery = document.getElementById("gallery");
